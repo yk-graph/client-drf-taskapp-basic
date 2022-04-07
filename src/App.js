@@ -2,33 +2,23 @@ import { useState } from 'react'
 import './App.css'
 
 const App = () => {
-  const [product, setProducts] = useState({ name: '', price: '' })
+  const [members, setMembers] = useState([])
+
+  const addMember = () =>
+    setMembers([...members, { id: members.length, name: 'newMembre!!' }])
 
   return (
     <div className="App">
       <header className="App-header">
         <div>
-          <span>productの名称 : {product.name}</span>
-          <br />
-          <span>productの価格 : {product.price}</span>
-          <div>
-            名称変更
-            <input
-              type="text"
-              onChange={(e) =>
-                setProducts({ ...product, name: e.target.value })
-              }
-            />
-          </div>
-          <div>
-            価格変更
-            <input
-              type="number"
-              onChange={(e) =>
-                setProducts({ ...product, price: e.target.value })
-              }
-            />
-          </div>
+          <button onClick={addMember}>クリックしてメンバーを追加！</button>
+          <ul>
+            {members.map((member) => (
+              <li key={member.id}>
+                {member.id}:{member.name}
+              </li>
+            ))}
+          </ul>
         </div>
       </header>
     </div>
