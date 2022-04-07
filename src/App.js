@@ -1,25 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from 'react'
+import './App.css'
 
-function App() {
+const App = () => {
+  const [product, setProducts] = useState({ name: '', price: '' })
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <div>
+          <span>productの名称 : {product.name}</span>
+          <br />
+          <span>productの価格 : {product.price}</span>
+          <div>
+            名称変更
+            <input
+              type="text"
+              onChange={(e) =>
+                setProducts({ ...product, name: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            価格変更
+            <input
+              type="number"
+              onChange={(e) =>
+                setProducts({ ...product, price: e.target.value })
+              }
+            />
+          </div>
+        </div>
       </header>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
