@@ -1,27 +1,23 @@
-import { useState } from 'react'
+import React from 'react'
 import './App.css'
+import AppContext from './contexts/AppContext'
+import { BrowserRouter, Route, Routes, Link } from 'react-router-dom'
+import Products from './pages/Products'
 
 const App = () => {
-  const [members, setMembers] = useState([])
-
-  const addMember = () =>
-    setMembers([...members, { id: members.length, name: 'newMembre!!' }])
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <div>
-          <button onClick={addMember}>クリックしてメンバーを追加！</button>
-          <ul>
-            {members.map((member) => (
-              <li key={member.id}>
-                {member.id}:{member.name}
-              </li>
-            ))}
-          </ul>
+    <AppContext.Provider value={'情報を他のコンポーネントに提供できる'}>
+      <BrowserRouter>
+        <Routes>
+          <Route exact path="/products" element={<Products />} />
+        </Routes>
+        <div className="App">
+          <header className="App-header">
+            <Link to="/products">プロダクトページへ</Link>
+          </header>
         </div>
-      </header>
-    </div>
+      </BrowserRouter>
+    </AppContext.Provider>
   )
 }
 
