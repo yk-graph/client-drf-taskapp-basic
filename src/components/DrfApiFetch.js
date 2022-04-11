@@ -70,7 +70,7 @@ const DrfApiFetch = () => {
   const updateTask = () => {
     const updateData = { id: editedTask.id, title: editedTask.title }
     axios
-      .put(`http://127.0.0.1:8000/api/tasks/${editedTask.id}`, updateData, {
+      .put(`http://127.0.0.1:8000/api/tasks/${editedTask.id}/`, updateData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
