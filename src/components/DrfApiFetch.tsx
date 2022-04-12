@@ -47,6 +47,7 @@ const DrfApiFetch: React.FC = () => {
       .then(() => {
         setTasks(tasks.filter((task) => task.id !== id))
         setSelectedTask(null)
+        setEditedTask({ id: undefined, title: '' })
       })
       .catch((error) => alert(error.message))
   }
@@ -64,6 +65,27 @@ const DrfApiFetch: React.FC = () => {
       .finally(() => setEditedTask({ ...editedTask, title: '' }))
   }
 
+  const updateTask = () => {
+    axios
+      .put<TaskType>(
+        `http://127.0.0.1:8000/api/tasks/${editedTask.id}/`,
+        editedTask,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
+          },
+        }
+      )
+      .then((res) =>
+        setTasks(
+          tasks.map((task) => (task.id === editedTask.id ? res.data : task))
+        )
+      )
+      .catch((error) => alert(error.message))
+      .finally(() => setEditedTask({ ...editedTask, id: undefined, title: '' }))
+  }
+
   return (
     <>
       <div className={styles.wrap}>
@@ -73,6 +95,17 @@ const DrfApiFetch: React.FC = () => {
             <li key={task.id}>
               {task.id} : {task.title}
               <button onClick={() => deleteTask(task.id)}>delete</button>
+              <button
+                onClick={() =>
+                  setEditedTask({
+                    ...editedTask,
+                    id: task.id,
+                    title: task.title,
+                  })
+                }
+              >
+                edit
+              </button>
             </li>
           ))}
         </ul>
@@ -110,7 +143,7 @@ const DrfApiFetch: React.FC = () => {
         )}
       </div>
       <div className={styles.wrap}>
-        <h5>タスク投稿</h5>
+        <h5>{editedTask.id ? 'タスク編集' : 'タスク投稿'}</h5>
         <input
           type="text"
           value={editedTask?.title}
@@ -118,7 +151,20 @@ const DrfApiFetch: React.FC = () => {
             setEditedTask({ ...editedTask, title: e.target.value })
           }
         />
-        <button onClick={() => createTask()}>Create Task</button>
+        {editedTask.id ? (
+          <>
+            <button onClick={() => updateTask()}>Update Task</button>
+            <button
+              onClick={() =>
+                setEditedTask({ ...editedTask, id: undefined, title: '' })
+              }
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <button onClick={() => createTask()}>Create Task</button>
+        )}
       </div>
     </>
   )
