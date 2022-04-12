@@ -5,7 +5,7 @@ const DrfApiFetch = () => {
   // タスク全件を保持する配列
   const [tasks, setTasks] = useState([])
   // 選択されたタスクのIDを保持
-  const [id, setId] = useState(null)
+  const [selectedId, setSelectedId] = useState(null)
   // 選択されたタスクのIDから取得したデータを保持するオブジェクト
   const [selectedTask, setSelectedTask] = useState(null)
   // 新規追加・更新用のタスクを保持するオブジェクト
@@ -23,9 +23,9 @@ const DrfApiFetch = () => {
   }, [])
 
   const getTask = () => {
-    id
+    selectedId
       ? axios
-          .get(`http://127.0.0.1:8000/api/tasks/${id}/`, {
+          .get(`http://127.0.0.1:8000/api/tasks/${selectedId}/`, {
             headers: {
               Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
             },
@@ -46,15 +46,17 @@ const DrfApiFetch = () => {
       })
       .then((res) => {
         setTasks(tasks.filter((task) => task.id !== id))
-        setSelectedTask({})
+        setSelectedId(null)
+        setSelectedTask(null)
+        setEditedTask({ id: '', title: '' })
       })
       .catch((error) => alert(alert))
   }
 
   const createTask = () => {
-    const data = { title: editedTask.title }
+    const newData = { title: editedTask.title }
     axios
-      .post(`http://127.0.0.1:8000/api/tasks/`, data, {
+      .post(`http://127.0.0.1:8000/api/tasks/`, newData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
@@ -77,9 +79,13 @@ const DrfApiFetch = () => {
         },
       })
       .then((res) => {
-        setTasks(
-          tasks.map((task) => (task.id === editedTask.id ? res.data : task))
+        const test = tasks.map((task) =>
+          task.id === editedTask.id ? res.data : task
         )
+        console.log(test)
+        // setTasks(
+        //   tasks.map((task) => (task.id === editedTask.id ? res.data : task))
+        // )
         setEditedTask({ id: '', title: '' })
       })
       .catch((error) => alert(error.message))
@@ -102,9 +108,7 @@ const DrfApiFetch = () => {
             </button>
             <button
               type="button"
-              onClick={() =>
-                setEditedTask({ ...editedTask, id: task.id, title: task.title })
-              }
+              onClick={() => setEditedTask({ id: task.id, title: task.title })}
             >
               Edit
             </button>
@@ -112,10 +116,8 @@ const DrfApiFetch = () => {
         ))}
       </ul>
       <div style={{ margin: '24px' }}>
-        <select onChange={(e) => setId(e.target.value)}>
-          <option value="" selected>
-            タスクのID番号を選択してください
-          </option>
+        <select onChange={(e) => setSelectedId(e.target.value)}>
+          <option value="">Select By Id</option>
           {tasks.map((task) => (
             <option key={task.id} value={task.id}>
               {task.id}
@@ -147,9 +149,17 @@ const DrfApiFetch = () => {
           required
         />
         {editedTask.id ? (
-          <button type="button" onClick={() => updateTask()}>
-            Update Task
-          </button>
+          <>
+            <button type="button" onClick={() => updateTask()}>
+              Update Task
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditedTask({ id: '', title: '' })}
+            >
+              Cancel
+            </button>
+          </>
         ) : (
           <button type="button" onClick={() => createTask()}>
             Create Task
