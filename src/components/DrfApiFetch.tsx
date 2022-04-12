@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { TaskType } from '../types/TaskType'
+import { EditedTaskType } from '../types/EditedTaskType'
 import styles from './DrfApiFetch.module.css'
 
 const DrfApiFetch: React.FC = () => {
   const [tasks, setTasks] = useState<TaskType[]>([])
-  const [selectedId, setSelectedId] = useState<number | null>()
+  const [selectedId, setSelectedId] = useState<number>()
   const [selectedTask, setSelectedTask] = useState<TaskType | null>()
+  const [editedTask, setEditedTask] = useState<EditedTaskType>({
+    id: undefined,
+    title: '',
+  })
 
   useEffect(() => {
     axios
@@ -39,8 +44,24 @@ const DrfApiFetch: React.FC = () => {
           Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
         },
       })
-      .then(() => setTasks(tasks.filter((task) => task.id !== id)))
+      .then(() => {
+        setTasks(tasks.filter((task) => task.id !== id))
+        setSelectedTask(null)
+      })
       .catch((error) => alert(error.message))
+  }
+
+  const createTask = () => {
+    axios
+      .post<TaskType>(`http://127.0.0.1:8000/api/tasks/`, editedTask, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
+        },
+      })
+      .then((res) => setTasks([...tasks, res.data]))
+      .catch((error) => alert(error.message))
+      .finally(() => setEditedTask({ ...editedTask, title: '' }))
   }
 
   return (
@@ -87,6 +108,17 @@ const DrfApiFetch: React.FC = () => {
             </div>
           </>
         )}
+      </div>
+      <div className={styles.wrap}>
+        <h5>タスク投稿</h5>
+        <input
+          type="text"
+          value={editedTask?.title}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setEditedTask({ ...editedTask, title: e.target.value })
+          }
+        />
+        <button onClick={() => createTask()}>Create Task</button>
       </div>
     </>
   )
