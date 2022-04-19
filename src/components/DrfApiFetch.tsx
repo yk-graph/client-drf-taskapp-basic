@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { TaskType } from '../types/Task'
+import { EditedTaskType } from '../types/EditedTask'
 
 const DrfApiFetch: React.FC = () => {
   const [tasks, setTasks] = useState<TaskType[]>([])
   const [selectedTask, setSelectedTask] = useState<TaskType | null>()
+  const [editedTask, setEditedTask] = useState<EditedTaskType>()
 
   useEffect(() => {
     axios
@@ -42,13 +44,27 @@ const DrfApiFetch: React.FC = () => {
       .catch((error) => alert(error.message))
   }
 
+  const createTask = async () => {
+    await axios
+      .post(`http://127.0.0.1:8000/api/tasks/`, editedTask, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
+        },
+      })
+      .then((res) => setTasks([...tasks, res.data]))
+      .catch((error) => alert(error.message))
+      .finally(() => setEditedTask({ id: undefined, title: '' }))
+  }
+
   return (
     <>
       <ul>
         {tasks.map((task) => (
           <li key={task.id}>
             {task.title}
-            <button onClick={() => getTask(task.id)}>Detail</button>
+            <button onClick={() => getTask(task.id)}>Show</button>
+            <button onClick={() => deleteTask(task.id)}>Delete</button>
           </li>
         ))}
       </ul>
@@ -59,11 +75,19 @@ const DrfApiFetch: React.FC = () => {
           <span>{selectedTask.title}</span>
           <br />
           <span>{selectedTask.created_at}</span>
-          <button onClick={() => deleteTask(selectedTask.id)}>delete</button>
         </div>
       ) : (
         <p>Taskの詳細は選択されていません</p>
       )}
+      <h5>Create Task</h5>
+      <input
+        type="text"
+        value={editedTask?.title}
+        onChange={(e) =>
+          setEditedTask({ id: undefined, title: e.target.value })
+        }
+      />
+      <button onClick={() => createTask()}>Create</button>
     </>
   )
 }
