@@ -4,7 +4,7 @@ import { TaskType } from '../types/Task'
 
 const DrfApiFetch: React.FC = () => {
   const [tasks, setTasks] = useState<TaskType[]>([])
-  const [selectedTask, setSelectedTask] = useState<TaskType>()
+  const [selectedTask, setSelectedTask] = useState<TaskType | null>()
 
   useEffect(() => {
     axios
@@ -28,6 +28,20 @@ const DrfApiFetch: React.FC = () => {
       .catch((error) => alert(error.message))
   }
 
+  const deleteTask = async (id: number) => {
+    await axios
+      .delete(`http://127.0.0.1:8000/api/tasks/${id}/`, {
+        headers: {
+          Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
+        },
+      })
+      .then(() => {
+        setTasks(tasks.filter((task) => task.id !== id))
+        setSelectedTask(null)
+      })
+      .catch((error) => alert(error.message))
+  }
+
   return (
     <>
       <ul>
@@ -45,6 +59,7 @@ const DrfApiFetch: React.FC = () => {
           <span>{selectedTask.title}</span>
           <br />
           <span>{selectedTask.created_at}</span>
+          <button onClick={() => deleteTask(selectedTask.id)}>delete</button>
         </div>
       ) : (
         <p>Taskの詳細は選択されていません</p>
