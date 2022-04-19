@@ -6,7 +6,10 @@ import { EditedTaskType } from '../types/EditedTask'
 const DrfApiFetch: React.FC = () => {
   const [tasks, setTasks] = useState<TaskType[]>([])
   const [selectedTask, setSelectedTask] = useState<TaskType | null>()
-  const [editedTask, setEditedTask] = useState<EditedTaskType>()
+  const [editedTask, setEditedTask] = useState<EditedTaskType>({
+    id: undefined,
+    title: '',
+  })
 
   useEffect(() => {
     axios
@@ -46,13 +49,30 @@ const DrfApiFetch: React.FC = () => {
 
   const createTask = async () => {
     await axios
-      .post(`http://127.0.0.1:8000/api/tasks/`, editedTask, {
+      .post('http://127.0.0.1:8000/api/tasks/', editedTask, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
         },
       })
       .then((res) => setTasks([...tasks, res.data]))
+      .catch((error) => alert(error.message))
+      .finally(() => setEditedTask({ id: undefined, title: '' }))
+  }
+
+  const updateTask = async () => {
+    await axios
+      .put(`http://127.0.0.1:8000/api/tasks/${editedTask.id}/`, editedTask, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Token f028a0c5f45579a45b59b49e2900ac7dbbb3ec04',
+        },
+      })
+      .then((res) =>
+        setTasks(
+          tasks.map((task) => (task.id === editedTask.id ? res.data : task))
+        )
+      )
       .catch((error) => alert(error.message))
       .finally(() => setEditedTask({ id: undefined, title: '' }))
   }
@@ -75,19 +95,33 @@ const DrfApiFetch: React.FC = () => {
           <span>{selectedTask.title}</span>
           <br />
           <span>{selectedTask.created_at}</span>
+          <button
+            onClick={() =>
+              setEditedTask({ id: selectedTask.id, title: selectedTask.title })
+            }
+          >
+            Edit
+          </button>
+          <button onClick={() => setEditedTask({ id: undefined, title: '' })}>
+            Clear
+          </button>
         </div>
       ) : (
         <p>Taskの詳細は選択されていません</p>
       )}
-      <h5>Create Task</h5>
+      <h5>{editedTask.id ? 'Update Task' : 'Create Task'}</h5>
       <input
         type="text"
-        value={editedTask?.title}
+        value={editedTask.title}
         onChange={(e) =>
-          setEditedTask({ id: undefined, title: e.target.value })
+          setEditedTask({ ...editedTask, title: e.target.value })
         }
       />
-      <button onClick={() => createTask()}>Create</button>
+      {editedTask.id ? (
+        <button onClick={() => updateTask()}>Update</button>
+      ) : (
+        <button onClick={() => createTask()}>Create</button>
+      )}
     </>
   )
 }

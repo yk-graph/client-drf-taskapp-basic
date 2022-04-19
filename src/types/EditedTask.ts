@@ -1,4 +1,4 @@
 export type EditedTaskType = {
-  id: number | undefined
+  id?: number
   title: string
 }
